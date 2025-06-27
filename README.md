@@ -42,9 +42,7 @@ dashboard-filter-applied-text is a Looker extension using React and JavaScript.
     application: dashboard-filter-applied-text {
         label: "dashboard-filter-applied-text React/JavaScript extension"
         url: "https://localhost:8080/bundle.js"
-        entitlements: {
-          core_api_methods: ["me"]
-        }
+        entitlements: {}
     }
    ```
 
@@ -78,8 +76,6 @@ To allow other people to use the extension, build the JavaScript bundle file and
     application: dashboard-filter-applied-text {
         label: "A Looker React/JavaScript extension"
         file: "bundle.js"
-        entitlements: {
-          core_api_methods: ["me"]
-        }
+        entitlements: {}
     }
    ```
