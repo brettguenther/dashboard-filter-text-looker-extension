@@ -10,4 +10,5 @@ application: dashboard-filter-applied-text {
     dashboard_tile: yes
     standalone: no
   }
+  entitlements: {}
 }
