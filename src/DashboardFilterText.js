@@ -1,37 +1,64 @@
-// Copyright 2021 Google LLC
-
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-
-//     https://www.apache.org/licenses/LICENSE-2.0
-
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 import React, { useEffect, useState, useContext } from 'react'
-import { Box, ComponentsProvider, Span } from '@looker/components'
+import {
+  Box,
+  ComponentsProvider,
+  Span,
+  InputText,
+  Button,
+} from '@looker/components'
 import { ExtensionContext40 } from '@looker/extension-sdk-react'
 
 export const DashboardFilterText = () => {
-
-  const { tileHostData } = useContext(ExtensionContext40);
-  const [myFilterValue, setMyFilterValue] = useState("all values");
+  const { tileHostData, extensionSDK } = useContext(ExtensionContext40)
+  const [myFilterValue, setMyFilterValue] = useState('all values')
+  const [filterName, setFilterName] = useState('MyFilter')
+  const [draftFilterName, setDraftFilterName] = useState(filterName)
+  const { isDashboardEditing, elementId } = tileHostData
 
   useEffect(() => {
-    const currentFilterValue = tileHostData?.dashboardFilters?.['MyFilter'];
-    setMyFilterValue(currentFilterValue);
-  }, [tileHostData]); // Re-run this effect whenever tileHostData changes
+    const init = async () => {
+      const context = await extensionSDK.getContextData()
+      if (context && context[elementId] && context[elementId].filterName) {
+        setFilterName(context[elementId].filterName)
+      }
+    }
+    if (elementId) {
+      init()
+    }
+  }, [elementId])
+
+  useEffect(() => {
+    setDraftFilterName(filterName)
+  }, [filterName])
+
+  useEffect(() => {
+    const currentFilterValue = tileHostData?.dashboardFilters?.[filterName]
+    setMyFilterValue(currentFilterValue)
+  }, [tileHostData, filterName])
+
+  const handleSave = async () => {
+    setFilterName(draftFilterName)
+    const context = (await extensionSDK.refreshContextData()) || {}
+    const newContext = { ...context, [elementId]: { filterName: draftFilterName } }
+    await extensionSDK.saveContextData(newContext)
+  }
+
+  const handleChange = (e) => {
+    setDraftFilterName(e.target.value)
+  }
 
   return (
     <ComponentsProvider>
+      {isDashboardEditing && (
+        <Box m="u4">
+          <InputText value={draftFilterName} onChange={handleChange} />
+          <Button onClick={handleSave}>Save</Button>
+        </Box>
+      )}
       {myFilterValue && (
         <Box bg="olive" p="u4" m="u4" borderRadius="4px">
           <Span color="white" fontSize="large" fontWeight="bold">
-            Planning for MyFilter Value: {myFilterValue}
+            Planning for {filterName} Value: {myFilterValue}
           </Span>
         </Box>
       )}
