@@ -21,6 +21,9 @@ export const DashboardFilterText = () => {
   const [draftTextColor, setDraftTextColor] = useState(textColor)
   const [linkUrl, setLinkUrl] = useState('')
   const [draftLinkUrl, setDraftLinkUrl] = useState(linkUrl)
+  const defaultTemplate = 'Planning for {filterName} Value: {filterValue}'
+  const [textTemplate, setTextTemplate] = useState(defaultTemplate)
+  const [draftTextTemplate, setDraftTextTemplate] = useState(textTemplate)
 
   const { isDashboardEditing, elementId, dashboardId } = tileHostData
 
@@ -57,6 +60,13 @@ export const DashboardFilterText = () => {
           setLinkUrl('')
           setDraftLinkUrl('')
         }
+        if (savedData.textTemplate) {
+          setTextTemplate(savedData.textTemplate)
+          setDraftTextTemplate(savedData.textTemplate)
+        } else {
+          setTextTemplate(defaultTemplate)
+          setDraftTextTemplate(defaultTemplate)
+        }
       }
     }
     if (elementId) {
@@ -78,6 +88,7 @@ export const DashboardFilterText = () => {
       backgroundColor: draftBackgroundColor,
       textColor: draftTextColor,
       linkUrl: draftLinkUrl,
+      textTemplate: draftTextTemplate,
     }
     const newContext = {
       ...context,
@@ -88,11 +99,16 @@ export const DashboardFilterText = () => {
     setBackgroundColor(newValues.backgroundColor)
     setTextColor(newValues.textColor)
     setLinkUrl(newValues.linkUrl)
+    setTextTemplate(newValues.textTemplate)
   }
 
   const handleChange = (e) => {
     setDraftFilterName(e.target.value)
   }
+
+  const displayText = textTemplate
+    .replace('{filterName}', filterName)
+    .replace('{filterValue}', myFilterValue)
 
   return (
     <ComponentsProvider>
@@ -103,6 +119,12 @@ export const DashboardFilterText = () => {
             label="Link URL"
             value={draftLinkUrl}
             onChange={(e) => setDraftLinkUrl(e.target.value)}
+          />
+          <FieldText
+            label="Text Template"
+            value={draftTextTemplate}
+            onChange={(e) => setDraftTextTemplate(e.target.value)}
+            description="Use {filterName} and {filterValue} as placeholders."
           />
           <FieldColor
             label="Background Color"
@@ -122,12 +144,12 @@ export const DashboardFilterText = () => {
           {linkUrl ? (
             <Link href={linkUrl} isExternal target="_blank" underline={false}>
               <Span color={textColor} fontSize="large" fontWeight="bold">
-                Planning for {filterName} Value: {myFilterValue}
+                {displayText}
               </Span>
             </Link>
           ) : (
             <Span color={textColor} fontSize="large" fontWeight="bold">
-              Planning for {filterName} Value: {myFilterValue}
+              {displayText}
             </Span>
           )}
         </Box>
