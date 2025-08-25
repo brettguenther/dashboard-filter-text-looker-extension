@@ -4,6 +4,7 @@ import {
   ComponentsProvider,
   Span,
   Button,
+  Link,
   FieldText,
   FieldColor,
 } from '@looker/components'
@@ -18,28 +19,43 @@ export const DashboardFilterText = () => {
   const [textColor, setTextColor] = useState('#FFFFFF')
   const [draftBackgroundColor, setDraftBackgroundColor] = useState(backgroundColor)
   const [draftTextColor, setDraftTextColor] = useState(textColor)
+  const [linkUrl, setLinkUrl] = useState('')
+  const [draftLinkUrl, setDraftLinkUrl] = useState(linkUrl)
+
   const { isDashboardEditing, elementId, dashboardId } = tileHostData
 
   const contextKey = `${elementId}-${dashboardId}`
 
   useEffect(() => {
-    // empty space for title
-    extensionSDK.updateTitle(null);
-  },[])
+    // empty space for title removal
+    if (extensionSDK) {
+      extensionSDK.updateTitle(" ");
+    }
+  },[extensionSDK])
 
   useEffect(() => {
     const init = async () => {
       const context = await extensionSDK.getContextData()
-      if (context && context[contextKey]) {
-        const { filterName, backgroundColor, textColor } = context[contextKey]
-        if (filterName) {
-          setFilterName(filterName)
+      const savedData = context?.[contextKey]
+      if (savedData) {
+        if (savedData.filterName) {
+          setFilterName(savedData.filterName)
+          setDraftFilterName(savedData.filterName)
         }
-        if (backgroundColor) {
-          setBackgroundColor(backgroundColor)
+        if (savedData.backgroundColor) {
+          setBackgroundColor(savedData.backgroundColor)
+          setDraftBackgroundColor(savedData.backgroundColor)
         }
-        if (textColor) {
-          setTextColor(textColor)
+        if (savedData.textColor) {
+          setTextColor(savedData.textColor)
+          setDraftTextColor(savedData.textColor)
+        }
+        if (savedData.linkUrl) {
+          setLinkUrl(savedData.linkUrl)
+          setDraftLinkUrl(savedData.linkUrl)
+        } else {
+          setLinkUrl('')
+          setDraftLinkUrl('')
         }
       }
     }
@@ -61,15 +77,17 @@ export const DashboardFilterText = () => {
       filterName: draftFilterName,
       backgroundColor: draftBackgroundColor,
       textColor: draftTextColor,
+      linkUrl: draftLinkUrl,
     }
     const newContext = {
       ...context,
-      contextKey: newValues,
+      [contextKey]: newValues,
     }
     await extensionSDK.saveContextData(newContext)
     setFilterName(newValues.filterName)
     setBackgroundColor(newValues.backgroundColor)
     setTextColor(newValues.textColor)
+    setLinkUrl(newValues.linkUrl)
   }
 
   const handleChange = (e) => {
@@ -81,6 +99,11 @@ export const DashboardFilterText = () => {
       {isDashboardEditing && (
         <Box m="u4">
           <FieldText label="Filter Name" value={draftFilterName} onChange={handleChange} />
+          <FieldText
+            label="Link URL"
+            value={draftLinkUrl}
+            onChange={(e) => setDraftLinkUrl(e.target.value)}
+          />
           <FieldColor
             label="Background Color"
             value={draftBackgroundColor}
@@ -96,9 +119,17 @@ export const DashboardFilterText = () => {
       )}
       {myFilterValue && (
         <Box bg={backgroundColor} p="u4" m="u4" borderRadius="4px">
-          <Span color={textColor} fontSize="large" fontWeight="bold">
-            Planning for {filterName} Value: {myFilterValue}
-          </Span>
+          {linkUrl ? (
+            <Link href={linkUrl} isExternal target="_blank" underline={false}>
+              <Span color={textColor} fontSize="large" fontWeight="bold">
+                Planning for {filterName} Value: {myFilterValue}
+              </Span>
+            </Link>
+          ) : (
+            <Span color={textColor} fontSize="large" fontWeight="bold">
+              Planning for {filterName} Value: {myFilterValue}
+            </Span>
+          )}
         </Box>
       )}
     </ComponentsProvider>
