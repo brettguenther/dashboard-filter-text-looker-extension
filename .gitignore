@@ -22,3 +22,7 @@ yarn-error.log*
 
 # local editor settings
 .vscode/
+
+.aiexclude
+example_filter_field.lkml
+GEMINI.md
