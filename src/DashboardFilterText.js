@@ -1,33 +1,9 @@
 import React, { useEffect, useState, useContext } from 'react'
-import {
-  Box,
-  ComponentsProvider,
-  Span,
-  Button,
-  Link,
-  FieldTextArea,
-  FieldColor,
-  Heading,
-} from '@looker/components'
+import { Button, ComponentsProvider } from '@looker/components'
 import { ExtensionContext40 } from '@looker/extension-sdk-react'
-
-const processTemplate = (template, filters, urlEncode = false) => {
-  if (!template || !filters) return template || ''
-
-  // Regex to find {filter.name} or {filter.value} placeholders
-  return template.replace(/{([^{}]+?)\.(name|value)}/g, (match, filterName, property) => {
-    const trimmedFilterName = filterName.trim()
-    if (property === 'name') {
-      return urlEncode ? encodeURIComponent(trimmedFilterName) : trimmedFilterName
-    }
-    if (property === 'value') {
-      const filterValue = filters[trimmedFilterName]
-      const valueToReplace = filterValue === undefined || filterValue === null ? '' : filterValue
-      return urlEncode ? encodeURIComponent(valueToReplace) : valueToReplace
-    }
-    return match // Should not happen, but as a fallback
-  })
-}
+import { ConfigPanel } from './ConfigPanel'
+import { DisplayView } from './DisplayView'
+import { processTemplate } from './utils'
 
 export const DashboardFilterText = () => {
   const { tileHostData, extensionSDK } = useContext(ExtensionContext40)
@@ -40,6 +16,8 @@ export const DashboardFilterText = () => {
   const defaultTemplate = 'Planning for {MyFilter.name} Value: {MyFilter.value}'
   const [textTemplate, setTextTemplate] = useState(defaultTemplate)
   const [draftTextTemplate, setDraftTextTemplate] = useState(textTemplate)
+  const [displayMode, setDisplayMode] = useState('view')
+  const [draftDisplayMode, setDraftDisplayMode] = useState(displayMode)
 
   const { isDashboardEditing, elementId, dashboardId } = tileHostData
 
@@ -79,6 +57,10 @@ export const DashboardFilterText = () => {
           setTextTemplate(defaultTemplate)
           setDraftTextTemplate(defaultTemplate)
         }
+        if (savedData.displayMode) {
+          setDisplayMode(savedData.displayMode)
+          setDraftDisplayMode(savedData.displayMode)
+        }
       }
     }
     if (elementId) {
@@ -94,6 +76,7 @@ export const DashboardFilterText = () => {
       textColor: draftTextColor,
       linkUrl: draftLinkUrl,
       textTemplate: draftTextTemplate,
+      displayMode: draftDisplayMode,
     }
     const newContext = {
       ...context,
@@ -104,6 +87,7 @@ export const DashboardFilterText = () => {
     setTextColor(newValues.textColor)
     setLinkUrl(newValues.linkUrl)
     setTextTemplate(newValues.textTemplate)
+    setDisplayMode(newValues.displayMode)
   }
 
   const dashboardFilters = tileHostData?.dashboardFilters || {}
@@ -141,67 +125,37 @@ export const DashboardFilterText = () => {
 
   return (
     <ComponentsProvider>
-      {isDashboardEditing && (
-        <Box m="u4">
-          <FieldTextArea
-            label="Link URL"
-            value={draftLinkUrl}
-            onChange={(e) => setDraftLinkUrl(e.target.value)}
-            description="Use {FilterName.name} and {FilterName.value} as placeholders."
+      {isDashboardEditing ? (
+        <ConfigPanel
+          draftLinkUrl={draftLinkUrl}
+          setDraftLinkUrl={setDraftLinkUrl}
+          draftTextTemplate={draftTextTemplate}
+          setDraftTextTemplate={setDraftTextTemplate}
+          draftBackgroundColor={draftBackgroundColor}
+          setDraftBackgroundColor={setDraftBackgroundColor}
+          draftTextColor={draftTextColor}
+          setDraftTextColor={setDraftTextColor}
+          previewProcessedLinkUrl={previewProcessedLinkUrl}
+          previewDisplayText={previewDisplayText}
+          onSave={handleSave}
+          draftDisplayMode={draftDisplayMode}
+          setDraftDisplayMode={setDraftDisplayMode}
+          extensionSDK={extensionSDK}
+        />
+      ) : shouldRender() ? (
+        displayMode === 'view' ? (
+          <DisplayView
+            backgroundColor={backgroundColor}
+            textColor={textColor}
+            linkUrl={linkUrl}
+            processedLinkUrl={processedLinkUrl}
+            displayText={displayText}
+            extensionSDK={extensionSDK}
           />
-          <FieldTextArea
-            label="Text Template"
-            value={draftTextTemplate}
-            onChange={(e) => setDraftTextTemplate(e.target.value)}
-            description="Use {FilterName.name} and {FilterName.value} as placeholders."
-          />
-          <FieldColor
-            label="Background Color"
-            value={draftBackgroundColor}
-            onChange={(e) => setDraftBackgroundColor(e.target.value)}
-          />
-          <FieldColor
-            label="Text Color"
-            value={draftTextColor}
-            onChange={(e) => setDraftTextColor(e.target.value)}
-          />
-          <Heading as="h4" mt="u4" mb="u2">
-            Preview
-          </Heading>
-          <Box bg={draftBackgroundColor} p="u4" borderRadius="4px">
-            {draftLinkUrl ? (
-              <Link
-                href={previewProcessedLinkUrl}
-                isExternal
-                target="_blank"
-                underline={false}
-              >
-                <Span color={draftTextColor} fontSize="large" fontWeight="bold">
-                  {previewDisplayText}
-                </Span>
-              </Link>
-            ) : (
-              <Span color={draftTextColor} fontSize="large" fontWeight="bold">{previewDisplayText}</Span>
-            )}
-          </Box>
-          <Button mt="small" onClick={handleSave}>Save</Button>
-        </Box>
-      )}
-      {shouldRender() && (
-        <Box bg={backgroundColor} p="u4" m="u4" borderRadius="4px">
-          {linkUrl ? (
-            <Link href={processedLinkUrl} isExternal target="_blank" underline={false}>
-              <Span color={textColor} fontSize="large" fontWeight="bold">
-                {displayText}
-              </Span>
-            </Link>
-          ) : (
-            <Span color={textColor} fontSize="large" fontWeight="bold">
-              {displayText}
-            </Span>
-          )}
-        </Box>
-      )}
+        ) : (
+          <Button onClick={() => extensionSDK.openBrowserWindow(processedLinkUrl, '_blank')}>{displayText}</Button>
+        )
+      ) : null}
     </ComponentsProvider>
   )
 }
