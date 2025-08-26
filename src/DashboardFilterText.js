@@ -5,8 +5,9 @@ import {
   Span,
   Button,
   Link,
-  FieldText,
+  FieldTextArea,
   FieldColor,
+  Heading,
 } from '@looker/components'
 import { ExtensionContext40 } from '@looker/extension-sdk-react'
 
@@ -108,6 +109,12 @@ export const DashboardFilterText = () => {
   const dashboardFilters = tileHostData?.dashboardFilters || {}
   const displayText = processTemplate(textTemplate, dashboardFilters)
   const processedLinkUrl = processTemplate(linkUrl, dashboardFilters, true)
+  const previewDisplayText = processTemplate(draftTextTemplate, dashboardFilters)
+  const previewProcessedLinkUrl = processTemplate(
+    draftLinkUrl,
+    dashboardFilters,
+    true
+  )
 
   const shouldRender = () => {
     if (isDashboardEditing) {
@@ -136,13 +143,13 @@ export const DashboardFilterText = () => {
     <ComponentsProvider>
       {isDashboardEditing && (
         <Box m="u4">
-          <FieldText
+          <FieldTextArea
             label="Link URL"
             value={draftLinkUrl}
             onChange={(e) => setDraftLinkUrl(e.target.value)}
             description="Use {FilterName.name} and {FilterName.value} as placeholders."
           />
-          <FieldText
+          <FieldTextArea
             label="Text Template"
             value={draftTextTemplate}
             onChange={(e) => setDraftTextTemplate(e.target.value)}
@@ -158,6 +165,25 @@ export const DashboardFilterText = () => {
             value={draftTextColor}
             onChange={(e) => setDraftTextColor(e.target.value)}
           />
+          <Heading as="h4" mt="u4" mb="u2">
+            Preview
+          </Heading>
+          <Box bg={draftBackgroundColor} p="u4" borderRadius="4px">
+            {draftLinkUrl ? (
+              <Link
+                href={previewProcessedLinkUrl}
+                isExternal
+                target="_blank"
+                underline={false}
+              >
+                <Span color={draftTextColor} fontSize="large" fontWeight="bold">
+                  {previewDisplayText}
+                </Span>
+              </Link>
+            ) : (
+              <Span color={draftTextColor} fontSize="large" fontWeight="bold">{previewDisplayText}</Span>
+            )}
+          </Box>
           <Button mt="small" onClick={handleSave}>Save</Button>
         </Box>
       )}
