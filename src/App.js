@@ -19,13 +19,13 @@
 */
 
 import React from 'react'
-import { DashboardFilterText } from './DashboardFilterText'
+import { DynamicDashboardText } from './DynamicDashboardText'
 import { ExtensionProvider40 } from '@looker/extension-sdk-react'
 
 export const App = () => {
   return (
     <ExtensionProvider40>
-      <DashboardFilterText />
+      <DynamicDashboardText />
     </ExtensionProvider40>
   )
 }

@@ -1,6 +1,8 @@
-# Looker Extension dashboard-filter-applied-text
+# Looker Extension: Dashboard Filter Link
 
-dashboard-filter-applied-text is a Looker extension using React and JavaScript.
+This Looker extension allows you to create a custom tile on a dashboard that can display dynamic text or a button. The text or button label can be customized to include values from the dashboard's filters. Additionally, you can configure a URL on the text or button that will also incorporate the current filter values.
+
+This enables you to create dynamic links or display messages based on the dashboard's context.
 
 ## Getting Started for Development
 
@@ -38,11 +40,19 @@ dashboard-filter-applied-text is a Looker extension using React and JavaScript.
    Either drag and upload the `manifest.lkml` file in this directory into your Looker project, or create a `manifest.lkml` with the same content. Change the `id`, `label`, or `url` as needed.
 
    ```
-    project_name: "dashboard-filter-applied-text"
-    application: dashboard-filter-applied-text {
-        label: "dashboard-filter-applied-text React/JavaScript extension"
+    project_name: "my-project"
+    application: dashboard-filter-link {
+        label: "Dashboard Filter Link"
         url: "https://localhost:8080/bundle.js"
-        entitlements: {}
+        # file: "bundle.js"
+        entitlements: {
+            new_window:  yes
+        }
+        mount_points: {
+            dashboard_vis: no
+            dashboard_tile: yes
+            standalone: no
+        }
     }
    ```
 
@@ -72,10 +82,17 @@ To allow other people to use the extension, build the JavaScript bundle file and
 3. Modify your `manifest.lkml` to use `file` instead of `url`:
 
    ```
-    project_name: "dashboard-filter-applied-text"
-    application: dashboard-filter-applied-text {
-        label: "A Looker React/JavaScript extension"
+    project_name: "my-project"
+    application: dashboard-filter-link {
+        label: "Dashboard Filter Link"
         file: "bundle.js"
-        entitlements: {}
+        entitlements: {
+            new_window:  yes
+        }
+        mount_points: {
+            dashboard_vis: no
+            dashboard_tile: yes
+            standalone: no
+        }
     }
    ```

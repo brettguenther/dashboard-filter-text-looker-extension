@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { Button, ComponentsProvider } from '@looker/components'
+import { Button, ComponentsProvider, Space } from '@looker/components'
 import { ExtensionContext40 } from '@looker/extension-sdk-react'
 import { ConfigPanel } from './ConfigPanel'
 import { DisplayView } from './DisplayView'
 import { processTemplate } from './utils'
 
-export const DashboardFilterText = () => {
+export const DynamicDashboardText = () => {
   const { tileHostData, extensionSDK } = useContext(ExtensionContext40)
   const [backgroundColor, setBackgroundColor] = useState('#111FF4')
   const [textColor, setTextColor] = useState('#FFFFFF')
@@ -13,7 +13,7 @@ export const DashboardFilterText = () => {
   const [draftTextColor, setDraftTextColor] = useState(textColor)
   const [linkUrl, setLinkUrl] = useState('')
   const [draftLinkUrl, setDraftLinkUrl] = useState(linkUrl)
-  const defaultTemplate = 'Planning for {MyFilter.name} Value: {MyFilter.value}'
+  const defaultTemplate = 'My Dynamic Link'
   const [textTemplate, setTextTemplate] = useState(defaultTemplate)
   const [draftTextTemplate, setDraftTextTemplate] = useState(textTemplate)
   const [displayMode, setDisplayMode] = useState('view')
@@ -153,7 +153,9 @@ export const DashboardFilterText = () => {
             extensionSDK={extensionSDK}
           />
         ) : (
-          <Button onClick={() => extensionSDK.openBrowserWindow(processedLinkUrl, '_blank')}>{displayText}</Button>
+          <Space align="center" justify="center">
+            <Button onClick={() => extensionSDK.openBrowserWindow(processedLinkUrl, '_blank')}>{displayText}</Button>
+          </Space>
         )
       ) : null}
     </ComponentsProvider>

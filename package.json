@@ -1,7 +1,7 @@
 {
-  "name": "dashboard-filter-applied-text",
+  "name": "dynamic-dashboard-text",
   "version": "0.0.1",
-  "description": "Bootstrapped Looker Extension with React and Javascript",
+  "description": "Looker Tile Extension to support filter templated dashboard text",
   "main": "dist/bundle.js",
   "scripts": {
     "analyze": "export ANALYZE_MODE=static && yarn build",
